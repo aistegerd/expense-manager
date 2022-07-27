@@ -1,0 +1,7 @@
+{
+  "name": "expenses-manager",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

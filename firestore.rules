@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow write: if false;
+    }
+  	match /users/{userId} {
+      allow read, update, delete: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn();
+    }
+    match /groups/{group} {
+      allow read: if isSignedIn() && isEmailVerified();
+     	allow create, update: if isSignedIn() && isEmailVerified() && isAdmin();
+      allow delete: if false;
+    }
+    match /modules/{document=**} {
+      allow read: if isSignedIn() && isEmailVerified();
+      allow delete: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isEmailVerified() {
+      return request.auth.token.email_verified;
+    }
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.group == 'admin';
+    }
+  }
+}
